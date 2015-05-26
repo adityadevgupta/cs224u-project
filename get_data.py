@@ -4,12 +4,15 @@ import numpy as np
 import threading
 import datetime
 
+# Get all the coordinates in latlong.csv and process them into a nice array
+
+
 # Module that handles Yak retrieval, without any preprocessing.
 # yg.fetch_yaks gets us all the yaks that would appear to a user.
 # (usually on the order of the 100 most recent yaks)
 # The location is set to Stanford's lat/long coords, because 
 # that's the location we're interested in.
-yg = YakGrabber()
+yg = YakGrabber(latitude=37.4300, longitude=-122.1700)
 
 # We were thinking about having some sort of time limit for yaks to accumulate
 # upvotes, but that didn't seem objective, since this depends on the activity
@@ -49,12 +52,14 @@ def handle_new_yak_set(completed_yaks, current_yaks, new_yaks_dict):
                 completed_yaks.append((yak_id, 
                                        current_yaks[yak_id][0], 
                                        current_yaks[yak_id][1], 
+                                       current_yaks[yak_id][2], 
                                        float("-inf")))
             else:
                 completed_yaks.append((yak_id, 
                                        current_yaks[yak_id][0], 
-                                       current_yaks[yak_id][1], 
-                                       float(current_yaks[yak_id][2])))
+                                       current_yaks[yak_id][1],
+                                       current_yaks[yak_id][2], 
+                                       float(current_yaks[yak_id][3])))
             keys_to_remove.add(yak_id)
     for to_del in keys_to_remove:
         del current_yaks[to_del]
@@ -62,7 +67,7 @@ def handle_new_yak_set(completed_yaks, current_yaks, new_yaks_dict):
     # UPDATE ALL CURRENT YAKS THAT ARE LEFT
     for yak_id in new_yaks_dict:
         if yak_id in current_yaks:
-            current_yaks[yak_id][2] = new_yaks_dict[yak_id][2]
+            current_yaks[yak_id][3] = new_yaks_dict[yak_id][3]
         else:
             current_yaks[yak_id] = new_yaks_dict[yak_id]
 
@@ -90,20 +95,22 @@ def handle_new_yak_set(completed_yaks, current_yaks, new_yaks_dict):
 # print completed_yaks
 # print current_yaks
 
-def make_dict(yaks_arr):
-    return {yak["messageID"]:[(yak['handle'] if ('handle' in yak) and yak['handle'] else ""), 
+def make_dict(location, yaks_arr):
+    return {yak["messageID"]:[location,
+                              (yak['handle'] if ('handle' in yak) and yak['handle'] else ""), 
                               yak['message'], 
                               yak['numberOfLikes']] for yak in yaks_arr}
 
 
 def update():
     most_recent_yaks = yg.fetch_yaks()
-    new_yaks_dict = make_dict(most_recent_yaks)
+    new_yaks_dict = make_dict(location, most_recent_yaks)
     handle_new_yak_set(completed_yaks, current_yaks, new_yaks_dict)    
 
 def continuously_grab_yaks():
     update()
-    print "Archived Yaks this file: " + str(len(completed_yaks))
+    print completed_yaks
+    # print "Archived Yaks this file: " + str(len(completed_yaks))
     # call f() again in 60 seconds
     threading.Timer(15, continuously_grab_yaks).start()
 

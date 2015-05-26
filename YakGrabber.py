@@ -14,7 +14,10 @@ from hashlib import md5
 import numpy as np
 
 class YakGrabber:
-	def __init__(self):
+	def __init__(self, location_name="stanford", latitude=37.4274745, longitude=-122.169719):
+		self.location_name=location_name
+		self.latitude = latitude
+		self.longitude = longitude
 		self.base_url = "https://us-east-api.yikyakapi.net/api/"
 		self.user_agent = "Dalvik/1.6.0 (Linux; U; Android 4.3; Samsung Galaxy S4 - 4.3 - API 18 - 1080x1920 Build/JLS36G)"
 		self.key = "EF64523D2BD1FA21F18F5BC654DFC41B"
@@ -64,8 +67,8 @@ class YakGrabber:
 	def fetch_yaks(self):
 		params = {
 		    "userID": "00000000-0000-0000-0000-000000000000", #self.id
-		    "userLat": "37.4274745", #self.location.latitude,
-		    "userLong": "-122.169719" #self.location.longitude,
+		    "userLat": str(self.latitude), #self.location.latitude,
+		    "userLong": str(self.longitude) #self.location.longitude,
 		}
 		response = self.get("getMessages", params)
 		return np.array(json.loads(response.text)["messages"])
