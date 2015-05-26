@@ -5,14 +5,17 @@ import threading
 import datetime
 
 # Get all the coordinates in latlong.csv and process them into a nice array
-
+lines = [line.rstrip('\n').split(", ") for line in open('latlong.csv')]
+locations = [(line[0].lower(), float(line[1]), float(line[2])) for line in lines]
 
 # Module that handles Yak retrieval, without any preprocessing.
 # yg.fetch_yaks gets us all the yaks that would appear to a user.
 # (usually on the order of the 100 most recent yaks)
 # The location is set to Stanford's lat/long coords, because 
 # that's the location we're interested in.
-yg = YakGrabber(latitude=37.4300, longitude=-122.1700)
+ygs = [YakGrabber(location_name=location[0], latitude=location[1], longitude=location[2])
+        for location in locations]
+curr_ind = 0
 
 # We were thinking about having some sort of time limit for yaks to accumulate
 # upvotes, but that didn't seem objective, since this depends on the activity
@@ -48,7 +51,7 @@ def handle_new_yak_set(completed_yaks, current_yaks, new_yaks_dict):
             # it's not actually possible to know exactly which one it is, but 
             # we simply use the heuristic that if the yak's numberOfLikes 
             # when it is in current_yaks is negative, we assume that it was voted off
-            if current_yaks[yak_id][2] < 0:
+            if current_yaks[yak_id][3] < 0:
                 completed_yaks.append((yak_id, 
                                        current_yaks[yak_id][0], 
                                        current_yaks[yak_id][1], 
@@ -102,17 +105,23 @@ def make_dict(location, yaks_arr):
                               yak['numberOfLikes']] for yak in yaks_arr}
 
 
-def update():
-    most_recent_yaks = yg.fetch_yaks()
-    new_yaks_dict = make_dict(location, most_recent_yaks)
-    handle_new_yak_set(completed_yaks, current_yaks, new_yaks_dict)    
+# def update(yg):
 
-def continuously_grab_yaks():
-    update()
-    print completed_yaks
+#     handle_new_yak_set(completed_yaks, current_yaks, new_yaks_dict)    
+
+def continuously_grab_yaks(curr_ind, new_yaks_dict):
+    yg = ygs[curr_ind%len(ygs)]
+    new_batch = yg.fetch_yaks()
+    new_batch_dict = make_dict(yg.location_name, new_batch)
+    new_yaks_dict.update(new_batch_dict)
+    if curr_ind == len(ygs):
+        handle_new_yak_set(completed_yaks, current_yaks, new_yaks_dict)
+        new_yaks_dict = {}
+        curr_ind = 0
+    print curr_ind, completed_yaks
     # print "Archived Yaks this file: " + str(len(completed_yaks))
     # call f() again in 60 seconds
-    threading.Timer(15, continuously_grab_yaks).start()
+    threading.Timer(2, continuously_grab_yaks, [curr_ind + 1, new_yaks_dict]).start()
 
 # start calling f now and every 60 sec thereafter
-continuously_grab_yaks()
+continuously_grab_yaks(0, {})
