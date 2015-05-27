@@ -39,7 +39,7 @@ current_yaks = {}
 # if completed_yaks becomes super big, just make it a numpy array and pickle it or something
 def handle_new_yak_set(completed_yaks, current_yaks, new_yaks_dict):
     # If completed_yaks is growing, store it in a numpy pickle file
-    if len(completed_yaks) > 50:
+    if len(completed_yaks) > 100:
         np.save(("data/small_fetches/yak_grab_" + str(datetime.datetime.now())), completed_yaks)
         del completed_yaks[:]
     # MOVE ALL OLD YAKS INTO completed_yaks
