@@ -41,7 +41,7 @@ def handle_new_yak_set(completed_yaks, current_yaks, new_yaks_dict):
     # If completed_yaks is growing, store it in a numpy pickle file
     if len(completed_yaks) > 100:
         np.save(("data/yak_grab_" + str(datetime.datetime.now())), completed_yaks)
-        completed_yaks = []
+        del completed_yaks[:]
     # MOVE ALL OLD YAKS INTO completed_yaks
     keys_to_remove = set()
     for yak_id in current_yaks:
@@ -118,10 +118,10 @@ def continuously_grab_yaks(curr_ind, new_yaks_dict):
         handle_new_yak_set(completed_yaks, current_yaks, new_yaks_dict)
         new_yaks_dict = {}
         curr_ind = 0
-    print curr_ind, completed_yaks
+    print curr_ind, len(completed_yaks)
     # print "Archived Yaks this file: " + str(len(completed_yaks))
     # call f() again in 60 seconds
-    threading.Timer(2, continuously_grab_yaks, [curr_ind + 1, new_yaks_dict]).start()
+    threading.Timer(1, continuously_grab_yaks, [curr_ind + 1, new_yaks_dict]).start()
 
 # start calling f now and every 60 sec thereafter
 continuously_grab_yaks(0, {})
