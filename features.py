@@ -28,6 +28,7 @@ for line in line_splits:
 # Capitalization counter
 # https://github.com/MathieuCliche/Sarcasm_detector
 def cap_feature(yak):
+    features = defaultdict(float)
     counter = 0
     thresh = 4 # for alternative feature below
     for j in range(len(yak[2])):
@@ -81,6 +82,7 @@ def interrogative_feature(yak):
 # "section leader" and "section leaders"
 # punctuation cutting off yaks.
 def bigram_feature(yak):
+    features = defaultdict(float)
     words = yak[2].lower().split()
     school = yak[0]
     for ind in xrange(len(words) - 1):
