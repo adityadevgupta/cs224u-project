@@ -52,8 +52,6 @@ def imbalance_feature(yak):
         if word.lower() in SENTI_STRENGTH:
             senti = np.append(senti, SENTI_STRENGTH[word.lower()])  
     
-    print senti
-    
     if affect.size > 0:
         features["Delta Affect"] = float(np.amax(affect) - np.amin(affect)) 
     if senti.size > 0:
