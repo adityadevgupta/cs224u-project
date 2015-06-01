@@ -36,6 +36,14 @@ def cap_feature(yak):
         #features['Capitalization'] += int(yak[2][j].isupper())
     features['Capitalization'] = int(counter >= thresh)
     return features
+
+def cap_propor_feature(yak):
+    features = defaultdict(float)
+    counter = 0
+    for j in range(len(yak[2])):
+        counter += int(yak[2][j].isupper())
+    features["Caps Proportion"] = float(counter / len(yak[2]))
+    return features
     
 # Punctuation
 punc_marks = ['.', '...', ';', ':', '?', '!', '\'', '\"']
@@ -101,11 +109,7 @@ def handle_feature(yak):
     features["Handle"] = float(yak[1] != '')
     return features
 
-# unigrams for handle by school association
 def handle_school_feature(yak):
     features = defaultdict(float)
-    words = yak[1].lower().split()
-    school = yak[0]
-    for ind in xrange(len(words)):
-        features[(school, words[ind])] += 1.0
+    features[(yak[0],yak[1].lower())] += 1.0
     return features
