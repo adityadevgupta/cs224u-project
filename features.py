@@ -4,15 +4,20 @@ import csv
 
 # Warriner et. al. affect score import
 lines = [line.rstrip('\n').split(",") for line in open('Ratings_Warriner_et_al.csv')]
-WARRINER_AFFECT = defaultdict(float)
+WARRINER_AFFECT = {}
 for line in lines[1:]:
     WARRINER_AFFECT[line[1].lower()] = float(line[2])
-
-# Feature functions
-
+    
+# SentiStrength score importing
+lines = [line.rstrip('\n') for line in open('SentStrength_Data_Sept2011/EmotionLookupTable.txt')]
+line_splits = [line.split() for line in lines]
+SENTI_STRENGTH = {}
+for line in line_splits:
+    SENTI_STRENGTH[line[0].rstrip('*')] =  float(line[1])
+    
+''' FEATURE FUNCTIONS
 '''
-Pointedness
-'''
+
 # Capitalization counter
 # https://github.com/MathieuCliche/Sarcasm_detector
 def cap_feature(yak):
@@ -25,29 +30,47 @@ def cap_feature(yak):
     
 # Punctuation
 punc_marks = ['.', '...', ';', ':', '?', '!', '\'', '\"']
-
 def punc_feature(yak):
     features = defaultdict(float)
     for i in punc_marks:
         features[('Punctuation ' + i)] += float(i in yak[2])
     return features
 
-'''
-Delta affect and delta sentiment
-'''
-
-def affect_feature(yak):
+# Delta affect
+def imbalance_feature(yak):
     features = defaultdict(float)
+    features["Delta Affect"] = float(0.0)
+    features["Delta Sentiment"] = float(0.0)
+    
     words = yak[2].split(" ")
-    scores = np.zeros((len(words)))
-    for ind, word in enumerate(words):
-        scores[ind] = WARRINER_AFFECT[word.lower()]
-    features["Delta Affect"] = (np.amax(scores) - np.amin(scores))
+    affect = np.array([])
+    senti = np.array([])
+
+    for word in words:
+        if word.lower() in WARRINER_AFFECT:
+            affect = np.append(affect, WARRINER_AFFECT[word.lower()])
+        if word.lower() in SENTI_STRENGTH:
+            senti = np.append(senti, SENTI_STRENGTH[word.lower()])  
+    
+    print senti
+    
+    if affect.size > 0:
+        features["Delta Affect"] = float(np.amax(affect) - np.amin(affect)) 
+    if senti.size > 0:
+        features["Delta Sentiment"] = float(np.amax(senti) - np.amin(senti)) 
+    
     return features
     
-def sentiment_feature(yak):
+# Is the sentence interrogative?
+def interrogative_feature(yak):
     features = defaultdict(float)
-    features["Delta Sentiment"] = 0.0
+    model_words = ['what', 'where', 'when', 'why', 'who']
+    auxiliary_verbs = ['am', 'is', 'are', 'was', 'were', 'am', 'do', 'did', 'does']
+    words = yak[2].split(" ")
+    
+    is_interrogative = ((words[0] in model_words) and 
+                        (words[1] in auxiliary_verbs) and ('?' in yak[2]))
+    features["Interrogative"] = float(is_interrogative)
     return features
 
 # "section leader" and "section leaders"
