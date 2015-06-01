@@ -48,9 +48,6 @@ def punc_feature(yak):
 # Delta affect
 def imbalance_feature(yak):
     features = defaultdict(float)
-    features["Delta Affect"] = float(0.0)
-    #features["Delta Sentiment"] = float(0.0)
-    
     words = yak[2].split(" ")
     affect = np.array([])
     senti = np.array([])
@@ -63,8 +60,8 @@ def imbalance_feature(yak):
     
     if affect.size > 0:
         features["Delta Affect"] = float(np.amax(affect) - np.amin(affect)) 
-    #if senti.size > 0:
-       # features["Delta Sentiment"] = float(np.amax(senti) - np.amin(senti)) 
+    if senti.size > 0:
+        features["Delta Sentiment"] = float(np.amax(senti) - np.amin(senti)) 
     
     return features
     
