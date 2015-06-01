@@ -1,6 +1,7 @@
 import numpy as np
 from collections import defaultdict
 import csv
+import nltk
 
 # Warriner et. al. affect score import
 lines = [line.rstrip('\n').split(",") for line in open('Ratings_Warriner_et_al.csv')]
@@ -95,14 +96,6 @@ def bigram_feature(yak):
         features[(school, words[ind], words[ind + 1])] += 1.0
     return features
 
-def trigram_feature(yak):
-    features = defaultdict(float)
-    words = yak[2].lower().split()
-    school = yak[0]
-    for ind in xrange(len(words) - 2):
-        features[(school, words[ind], words[ind + 1], words[ind + 2])] += 1.0
-    return features
-
 # does the yak contain a handle?
 def handle_feature(yak):
     features = defaultdict(float)
@@ -112,4 +105,23 @@ def handle_feature(yak):
 def handle_school_feature(yak):
     features = defaultdict(float)
     features[(yak[0],yak[1].lower())] += 1.0
+    return features
+
+# PRITHVI'S NEW STUFF
+
+def trigram_feature(yak):
+    features = defaultdict(float)
+    words = yak[2].lower().split()
+    school = yak[0]
+    for ind in xrange(len(words) - 2):
+        features[(school, words[ind], words[ind + 1], words[ind + 2])] += 1.0
+    return features
+
+def unigram_feature(yak):
+    features = defaultdict(float)
+    text = yak[2]
+    tokens = [word for sent in nltk.tokenize.sent_tokenize(text) for word in nltk.tokenize.word_tokenize(sent)]
+    words = filter(lambda word: word not in ',-', tokens)
+    for word in words:
+        features[word] += 1.0
     return features
