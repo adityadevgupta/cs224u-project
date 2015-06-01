@@ -48,7 +48,7 @@ def punc_feature(yak):
 def imbalance_feature(yak):
     features = defaultdict(float)
     features["Delta Affect"] = float(0.0)
-    features["Delta Sentiment"] = float(0.0)
+    #features["Delta Sentiment"] = float(0.0)
     
     words = yak[2].split(" ")
     affect = np.array([])
@@ -62,8 +62,8 @@ def imbalance_feature(yak):
     
     if affect.size > 0:
         features["Delta Affect"] = float(np.amax(affect) - np.amin(affect)) 
-    if senti.size > 0:
-        features["Delta Sentiment"] = float(np.amax(senti) - np.amin(senti)) 
+    #if senti.size > 0:
+       # features["Delta Sentiment"] = float(np.amax(senti) - np.amin(senti)) 
     
     return features
     
@@ -86,5 +86,28 @@ def bigram_feature(yak):
     words = yak[2].lower().split()
     school = yak[0]
     for ind in xrange(len(words) - 1):
-        features[(school, words[ind], words[ind + 1])] += 1.0
+        features[(school, words[ind].lower(), words[ind + 1].lower())] += 1.0
+    return features
+
+def trigram_feature(yak):
+    features = defaultdict(float)
+    words = yak[2].lower().split()
+    school = yak[0]
+    for ind in xrange(len(words) - 2):
+        features[(school, words[ind], words[ind + 1], words[ind + 2])] += 1.0
+    return features
+
+# does the yak contain a handle?
+def handle_feature(yak):
+    features = defaultdict(float)
+    features["Handle"] = float(yak[1] != '')
+    return features
+
+# unigrams for handle by school association
+def handle_school_feature(yak):
+    features = defaultdict(float)
+    words = yak[1].lower().split()
+    school = yak[0]
+    for ind in xrange(len(words)):
+        features[(school, words[ind])] += 1.0
     return features
