@@ -15,6 +15,13 @@ SENTI_STRENGTH = {}
 for line in line_splits:
     SENTI_STRENGTH[line[0].rstrip('*')] =  float(line[1])
     
+# Booster word list
+lines = [line.rstrip('\n') for line in open('SentStrength_Data_Sept2011/BoosterWordList.txt')]
+line_splits = [line.split() for line in lines]
+SENTI_STRENGTH = {}
+for line in line_splits:
+    SENTI_STRENGTH[line[0].rstrip('*')] =  float(line[1])
+    
 ''' FEATURE FUNCTIONS
 '''
 
