@@ -32,8 +32,9 @@ def cap_feature(yak):
     counter = 0
     thresh = 4 # for alternative feature below
     for j in range(len(yak[2])):
-        features['Capitalization'] += int(yak[2][j].isupper())
-#     features['Capitalization'] = int(counter >= thresh)
+        counter += int(yak[2][j].isupper())
+        #features['Capitalization'] += int(yak[2][j].isupper())
+    features['Capitalization'] = int(counter >= thresh)
     return features
     
 # Punctuation
@@ -86,7 +87,7 @@ def bigram_feature(yak):
     words = yak[2].lower().split()
     school = yak[0]
     for ind in xrange(len(words) - 1):
-        features[(school, words[ind].lower(), words[ind + 1].lower())] += 1.0
+        features[(school, words[ind], words[ind + 1])] += 1.0
     return features
 
 def trigram_feature(yak):
