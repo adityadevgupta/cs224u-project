@@ -125,3 +125,16 @@ def unigram_feature(yak):
     for word in words:
         features[word] += 1.0
     return features
+
+def word_count_feature(yak):
+    features = defaultdict(float)
+    text = yak[2].lower()
+    tokens = [word for sent in nltk.tokenize.sent_tokenize(text) for word in nltk.tokenize.word_tokenize(sent)]
+    words = filter(lambda word: word not in ',-', tokens)
+    counts = [word_counts[word] for word in words]
+    features["num_zero_count_words"] = counts.count(0) if len(counts) > 0 else 0
+    features["max_count_word"] = max(counts) if len(counts) > 0 else 0
+    nonzeros = [count for count in counts if count > 0]
+    features["min_count_word"] = min(nonzeros) if len(nonzeros) > 0 else 0
+    return features
+    
